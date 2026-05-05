@@ -47,8 +47,8 @@ export default function Sidebar({ attacks, now }) {
                 {attack.target.country}
               </p>
               <p className={`text-xs ${typeColor(attack.type)}`}>
-                {attack.type} | {attack.severity} | {attack.signature} |{" "}
-                {formatRelativeTime(attack.timestamp, now)}
+                <span className="font-mono font-medium">{attack.type} | {attack.severity} | {attack.signature}</span> |{" "}
+                <span className="font-mono font-light">{formatRelativeTime(attack.timestamp, now)}</span>
               </p>
             </div>
           ))}
@@ -62,7 +62,7 @@ export default function Sidebar({ attacks, now }) {
             {topAttackers.map(([country, count]) => (
               <li key={country} className="flex items-center justify-between gap-2">
                 <span className="truncate">{country}</span>
-                <span className="text-white/80">{count}</span>
+                <span className="text-white/80 font-mono font-medium">{count}</span>
               </li>
             ))}
           </ul>
@@ -73,7 +73,7 @@ export default function Sidebar({ attacks, now }) {
             {topTargets.map(([country, count]) => (
               <li key={country} className="flex items-center justify-between gap-2">
                 <span className="truncate">{country}</span>
-                <span className="text-white/80">{count}</span>
+                <span className="text-white/80 font-mono font-medium">{count}</span>
               </li>
             ))}
           </ul>

@@ -1,5 +1,1 @@
-import ThreatDashboard from "./components/ThreatDashboard";
-
-export default function Home() {
-  return <ThreatDashboard />;
-}
+export { default } from "./home/page";

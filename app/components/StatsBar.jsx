@@ -10,7 +10,12 @@ function getMostFrequent(attacks, keyFn) {
   return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
 }
 
-export default function StatsBar({ attacks, now, totalAttacks = attacks.length }) {
+export default function StatsBar({
+  attacks,
+  compact = false,
+  now,
+  totalAttacks = attacks.length,
+}) {
   const oneDayAgo = now - 24 * 60 * 60 * 1000;
   const attacks24h = attacks.filter((attack) => attack.timestamp >= oneDayAgo);
   const recentMinute = attacks.filter(
@@ -32,11 +37,15 @@ export default function StatsBar({ attacks, now, totalAttacks = attacks.length }
   ];
 
   return (
-    <div className="pointer-events-auto grid w-full grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-5">
+    <div
+      className={`pointer-events-auto grid w-full gap-2 ${
+        compact ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4 xl:grid-cols-5"
+      }`}
+    >
       {cards.map((card) => (
         <div key={card.label} className="glass-panel px-3 py-2.5 lg:px-4 lg:py-3">
           <p className="eyebrow">{card.label}</p>
-          <p className="mt-1 truncate text-base font-semibold text-white lg:text-lg">
+          <p className="mt-1 truncate text-base font-mono font-medium text-white lg:text-lg">
             {card.value}
           </p>
         </div>

@@ -13,7 +13,12 @@ export default function ThreatMap({ attacks }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const overlayRef = useRef(null);
+  const attacksRef = useRef(attacks);
   const [clock, setClock] = useState(0);
+
+  useEffect(() => {
+    attacksRef.current = attacks;
+  }, [attacks]);
 
   const points = useMemo(() => {
     return attacks.flatMap((attack) => [
@@ -81,6 +86,8 @@ export default function ThreatMap({ attacks }) {
         "high-color": "rgb(15, 15, 15)",
         "horizon-blend": 0.18,
       });
+      initializeRouteLayers(mapRef.current);
+      updateRouteSource(mapRef.current, attacksRef.current);
     });
 
     overlayRef.current = new MapboxOverlay({ interleaved: false, layers: [] });
@@ -96,6 +103,7 @@ export default function ThreatMap({ attacks }) {
 
   useEffect(() => {
     if (!overlayRef.current) return;
+    updateRouteSource(mapRef.current, attacks);
 
     const arcLayer = new ArcLayer({
       id: "threat-arcs",
@@ -175,4 +183,121 @@ function fadedColor(attack, clock) {
   const fade = Math.max(0.2, 1 - age / 45000);
 
   return [color[0], color[1], color[2], Math.round(color[3] * fade)];
+}
+
+function initializeRouteLayers(map) {
+  if (!map || map.getSource("threat-routes")) return;
+
+  map.addSource("threat-routes", {
+    type: "geojson",
+    data: routeFeatureCollection([]),
+  });
+
+  map.addLayer({
+    id: "threat-routes-glow",
+    type: "line",
+    source: "threat-routes",
+    paint: {
+      "line-blur": 7,
+      "line-color": routeColorExpression(),
+      "line-opacity": 0.58,
+      "line-width": [
+        "interpolate",
+        ["linear"],
+        ["get", "volume"],
+        50,
+        4,
+        320,
+        10,
+      ],
+    },
+  });
+
+  map.addLayer({
+    id: "threat-routes-core",
+    type: "line",
+    source: "threat-routes",
+    paint: {
+      "line-color": routeColorExpression(),
+      "line-opacity": [
+        "match",
+        ["get", "severity"],
+        "Critical",
+        0.96,
+        "Medium",
+        0.74,
+        0.54,
+      ],
+      "line-width": [
+        "interpolate",
+        ["linear"],
+        ["get", "volume"],
+        50,
+        1.4,
+        320,
+        4.2,
+      ],
+    },
+  });
+}
+
+function updateRouteSource(map, attacks) {
+  const source = map?.getSource("threat-routes");
+  if (!source) return;
+
+  source.setData(routeFeatureCollection(attacks.slice(0, 80)));
+}
+
+function routeFeatureCollection(attacks) {
+  return {
+    type: "FeatureCollection",
+    features: attacks.map((attack) => ({
+      type: "Feature",
+      properties: {
+        id: attack.id,
+        severity: attack.severity,
+        type: attack.type,
+        volume: attack.volume,
+      },
+      geometry: {
+        type: "LineString",
+        coordinates: interpolateRoute(
+          attack.source.coordinates,
+          attack.target.coordinates
+        ),
+      },
+    })),
+  };
+}
+
+function interpolateRoute(source, target) {
+  const steps = 32;
+  const [sourceLng, sourceLat] = source;
+  const [targetLng, targetLat] = target;
+
+  return Array.from({ length: steps + 1 }, (_, index) => {
+    const t = index / steps;
+    const lift = Math.sin(Math.PI * t) * 18;
+
+    return [
+      sourceLng + (targetLng - sourceLng) * t,
+      sourceLat + (targetLat - sourceLat) * t + lift,
+    ];
+  });
+}
+
+function routeColorExpression() {
+  return [
+    "match",
+    ["get", "type"],
+    "DDoS",
+    "#ff3b3b",
+    "Malware",
+    "#ff9500",
+    "Phishing",
+    "#ffd60a",
+    "Ransomware",
+    "#ff2e63",
+    "#ffffff",
+  ];
 }
