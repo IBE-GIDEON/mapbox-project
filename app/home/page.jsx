@@ -52,27 +52,6 @@ export default function LandingPage() {
   const [progress,        setProgress]        = useState(0)
   const [labelPositions,  setLabelPositions]  = useState([])
 
-  /* ─── Cursor ─── */
-  useEffect(() => {
-    const cursor = document.getElementById('cm-cursor')
-    const ring   = document.getElementById('cm-ring')
-    if (!cursor || !ring) return
-    let mx = 0, my = 0, rx = 0, ry = 0, raf
-    const onMove = (e) => { mx = e.clientX; my = e.clientY }
-    document.addEventListener('mousemove', onMove)
-    const animate = () => {
-      cursor.style.left = mx + 'px'
-      cursor.style.top  = my + 'px'
-      rx += (mx - rx) * 0.12
-      ry += (my - ry) * 0.12
-      ring.style.left = rx + 'px'
-      ring.style.top  = ry + 'px'
-      raf = requestAnimationFrame(animate)
-    }
-    animate()
-    return () => { document.removeEventListener('mousemove', onMove); cancelAnimationFrame(raf) }
-  }, [])
-
   /* ─── Label positions ─── */
   const computeLabels = () => {
     if (!svgRef.current || !containerRef.current) return
@@ -135,18 +114,6 @@ export default function LandingPage() {
 
   return (
     <>
-      {/* Cursor */}
-      <div id="cm-cursor" style={{
-        width:8, height:8, background:W, borderRadius:'50%',
-        position:'fixed', pointerEvents:'none', zIndex:9999,
-        transform:'translate(-50%,-50%)', mixBlendMode:'difference',
-      }}/>
-      <div id="cm-ring" style={{
-        width:32, height:32, border:`1px solid rgba(255,255,255,0.3)`,
-        borderRadius:'50%', position:'fixed', pointerEvents:'none',
-        zIndex:9998, transform:'translate(-50%,-50%)', transition:'all 0.15s ease',
-      }}/>
-
       {/* ── NAV ── */}
       <nav style={{
         position:'fixed', top:0, left:0, right:0, zIndex:100,
@@ -228,7 +195,7 @@ export default function LandingPage() {
               background:W, color:'#080808', border:'none',
               padding:'14px 32px', fontFamily:sans,
               fontSize:13, fontWeight:500, letterSpacing:'0.05em',
-              cursor:'none', transition:'opacity 0.2s',
+              cursor:'pointer', transition:'opacity 0.2s',
             }}
               onMouseEnter={e => e.currentTarget.style.opacity='0.85'}
               onMouseLeave={e => e.currentTarget.style.opacity='1'}
@@ -238,7 +205,7 @@ export default function LandingPage() {
               background:'none', color:MUTED,
               border:`1px solid ${BORDER}`,
               padding:'14px 32px', fontFamily:sans,
-              fontSize:13, fontWeight:400, cursor:'none', transition:'all 0.2s',
+              fontSize:13, fontWeight:400, cursor:'pointer', transition:'all 0.2s',
             }}
               onMouseEnter={e => { e.currentTarget.style.color=W; e.currentTarget.style.borderColor='rgba(255,255,255,0.2)' }}
               onMouseLeave={e => { e.currentTarget.style.color=MUTED; e.currentTarget.style.borderColor=BORDER }}
@@ -401,7 +368,7 @@ export default function LandingPage() {
             background:W, color:'#080808', border:'none',
             padding:'16px 40px', fontFamily:sans,
             fontSize:14, fontWeight:500, letterSpacing:'0.05em',
-            cursor:'none', transition:'opacity 0.2s', marginTop:'0.5rem',
+            cursor:'pointer', transition:'opacity 0.2s', marginTop:'0.5rem',
           }}
             onMouseEnter={e => e.currentTarget.style.opacity='0.85'}
             onMouseLeave={e => e.currentTarget.style.opacity='1'}
@@ -418,9 +385,9 @@ export default function LandingPage() {
           color:#f5f5f0;
           font-family:'Space Grotesk', sans-serif;
           overflow-x:hidden;
-          cursor:none;
+          cursor:auto;
         }
-        a, button { cursor:none; }
+        a, button { cursor:pointer; }
         [data-fade] {
           opacity:0;
           transform:translateY(24px);

@@ -18,7 +18,9 @@ export default function InteractionPanel({
   allAttacks,
   availableTargets,
   filters,
+  isOpen,
   isLive,
+  onCloseChat,
   onOpenMapInfo,
   onResetFilters,
   onSetFilters,
@@ -75,20 +77,30 @@ export default function InteractionPanel({
   }
 
   return (
-    <aside className={`chat-surface${messages.length ? " has-messages" : ""}`}>
+    <aside hidden={!isOpen} className={`chat-surface${messages.length ? " has-messages" : ""}`}>
       <div className="ai-orb" />
 
       <header className="ai-hero">
         <div className="flex items-center justify-between gap-3">
           <p className="eyebrow">Threat Analyst</p>
-          <button
-            type="button"
-            aria-pressed={isLive}
-            onClick={() => onToggleLive((current) => !current)}
-            className="live-toggle"
-          >
-            {isLive ? "Live" : "Paused"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onCloseChat}
+              className="chat-close-button"
+              aria-label="Close chat panel"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              aria-pressed={isLive}
+              onClick={() => onToggleLive((current) => !current)}
+              className="live-toggle"
+            >
+              {isLive ? "Live" : "Paused"}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -112,53 +124,53 @@ export default function InteractionPanel({
 
       <div className="chat-input-dock">
         <form
-        className="ai-composer"
-        onSubmit={(event) => {
-          event.preventDefault();
-          submitPrompt();
-        }}
-      >
-        <textarea
-          value={prompt}
-          onChange={(event) => setPrompt(event.target.value)}
-          className="ai-input"
-          placeholder="Message AI chat..."
-          rows={4}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey) {
-              event.preventDefault();
-              submitPrompt();
-            }
+          className="ai-composer"
+          onSubmit={(event) => {
+            event.preventDefault();
+            submitPrompt();
           }}
-        />
+        >
+          <textarea
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+            className="ai-input"
+            placeholder="Message AI chat..."
+            rows={4}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                submitPrompt();
+              }
+            }}
+          />
 
-        <div className="composer-actions">
-          <div className="flex flex-wrap items-center gap-2">
-            <button type="button" className="tool-pill compact" aria-label="Attach data">
-              +
-            </button>
-            <button type="button" onClick={() => submitPrompt("Search active threats")} className="tool-pill">
-              Search
-            </button>
-            <button type="button" onClick={onOpenMapInfo} className="tool-pill">
-              Map info
-            </button>
-          </div>
+          <div className="composer-actions">
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" className="tool-pill compact" aria-label="Attach data">
+                +
+              </button>
+              <button type="button" onClick={() => submitPrompt("Search active threats")} className="tool-pill">
+                Search
+              </button>
+              <button type="button" onClick={onOpenMapInfo} className="tool-pill">
+                Map info
+              </button>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onToggleLive((current) => !current)}
-              className="tool-pill compact"
-              aria-label={isLive ? "Pause live feed" : "Resume live feed"}
-            >
-              {isLive ? "||" : ">"}
-            </button>
-            <button type="submit" className="send-button" aria-label="Send analyst command">
-              ↑
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onToggleLive((current) => !current)}
+                className="tool-pill compact"
+                aria-label={isLive ? "Pause live feed" : "Resume live feed"}
+              >
+                {isLive ? "||" : ">"}
+              </button>
+              <button type="submit" className="send-button" aria-label="Send analyst command">
+                ↑
+              </button>
+            </div>
           </div>
-        </div>
         </form>
 
         {messages.length === 0 ? (

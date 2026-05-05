@@ -64,6 +64,28 @@ export default function ThreatMap({ attacks }) {
   }, []);
 
   useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container || typeof ResizeObserver === "undefined") return undefined;
+
+    let frameId = null;
+    const resizeMap = () => {
+      if (frameId) window.cancelAnimationFrame(frameId);
+      frameId = window.requestAnimationFrame(() => mapRef.current?.resize());
+    };
+
+    const resizeObserver = new ResizeObserver(resizeMap);
+    resizeObserver.observe(container);
+    window.addEventListener("resize", resizeMap);
+    resizeMap();
+
+    return () => {
+      if (frameId) window.cancelAnimationFrame(frameId);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", resizeMap);
+    };
+  }, []);
+
+  useEffect(() => {
     const token = getMapboxToken();
     if (!mapContainerRef.current || mapRef.current || !token) return;
 

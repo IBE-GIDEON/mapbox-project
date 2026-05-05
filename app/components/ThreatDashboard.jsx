@@ -24,6 +24,7 @@ export default function ThreatDashboard() {
   const [isLive, setIsLive] = useState(true);
   const [now, setNow] = useState(0);
   const [isMapInfoOpen, setIsMapInfoOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(true);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => setAttacks(seedAttacks(42)), 0);
@@ -83,13 +84,15 @@ export default function ThreatDashboard() {
 
   return (
     <main className="min-h-dvh bg-black text-slate-50">
-      <div className="grid min-h-dvh lg:grid-cols-[minmax(360px,460px)_1fr]">
+      <div className={`dashboard-layout${isChatOpen ? "" : " chat-collapsed"}`}>
         <InteractionPanel
           activeAttack={activeAttack}
           allAttacks={attacks}
           availableTargets={availableTargets}
           filters={filters}
+          isOpen={isChatOpen}
           isLive={isLive}
+          onCloseChat={() => setIsChatOpen(false)}
           onOpenMapInfo={() => setIsMapInfoOpen(true)}
           onResetFilters={() => setFilters(INITIAL_FILTERS)}
           onSetFilters={setFilters}
@@ -102,8 +105,19 @@ export default function ThreatDashboard() {
             <ThreatMap attacks={filteredAttacks} />
             <div className="pointer-events-none absolute inset-0 map-vignette" />
 
+            {!isChatOpen ? (
+              <button
+                type="button"
+                onClick={() => setIsChatOpen(true)}
+                className="chat-open-button"
+              >
+                Open Chat
+              </button>
+            ) : null}
+
             <MapCommandBar
               activeAttack={activeAttack}
+              isChatOpen={isChatOpen}
               isLive={isLive}
               isMapInfoOpen={isMapInfoOpen}
               onToggleLive={setIsLive}
@@ -130,13 +144,14 @@ export default function ThreatDashboard() {
 
 function MapCommandBar({
   activeAttack,
+  isChatOpen,
   isLive,
   isMapInfoOpen,
   onToggleLive,
   onToggleMapInfo,
 }) {
   return (
-    <div className="map-command-bar">
+    <div className={`map-command-bar${isChatOpen ? "" : " chat-hidden"}`}>
       <div className="map-route-summary">
         <p className="eyebrow">Active Route</p>
         <p className="mt-1 truncate text-sm font-semibold text-white">
